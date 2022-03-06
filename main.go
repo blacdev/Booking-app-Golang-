@@ -1,38 +1,50 @@
 package main
 
 import (
+	// "booking-app/helper"
 	F "fmt"
-	"strings"
 )
 
-func main() {
-	var conferenceName string = "Go Conference"
-	const conferenceTickets = 50
-	var conferenceRemainingTickets uint = 50
-	var bookingsList []string
+var conferenceName string = "Go Conference"
 
-	// call gretings function
+const conferenceTickets = 50
+
+var conferenceRemainingTickets uint = 50
+
+// Create a list of type struct with empty list
+var bookingsList = make([]UserData, 0)
+
+// Assign variable names to and data type in struct
+type UserData struct {
+	firstName       string
+	lastName        string
+	emailAddress    string
+	numberOfTickets uint
+}
+
+func main() {
 
 	for {
-		// Greet user
-		greetUsers(conferenceName, conferenceTickets, conferenceRemainingTickets)
+
+		// call gretings function
+		greetUsers()
 
 		// Get user detials
 		firstName, lastName, emailAddress, userTickets := getUserInfo()
 
 		// Vaidate user details
-		isValidName, isValidEmail, isValidTickets := validateUserInput(firstName, lastName, emailAddress, conferenceRemainingTickets, userTickets)
+		isValidName, isValidEmail, isValidTickets := ValidateUserInput(firstName, lastName, emailAddress, userTickets, conferenceRemainingTickets)
 		if isValidName && isValidEmail && isValidTickets {
 
 			// book user ticket
-			bookingsList, conferenceRemainingTickets := bookTicket(bookingsList, firstName, lastName, conferenceName, emailAddress, conferenceRemainingTickets, userTickets)
+			conferenceRemainingTickets := bookTicket(firstName, lastName, emailAddress, userTickets)
 
 			// Call function to print first name
 			F.Printf("Thank you %v %v for booking %v tickets. You will recieve a confirmation email shortly at %v.\n", firstName, lastName, userTickets, emailAddress)
 			F.Printf("%v tickets remaining for %v\n", conferenceRemainingTickets, conferenceName)
 
 			// Retrieve user first name
-			firstNames := getFirstName(bookingsList)
+			firstNames := getFirstName()
 			F.Printf("The first names of booking are %v\n", firstNames)
 
 			// confirm amount of tickets
@@ -59,7 +71,7 @@ func main() {
 
 // Greet users
 
-func greetUsers(conferenceName string, conferenceTickets int, conferenceRemainingTickets uint) {
+func greetUsers() {
 	// greet users when they get to the screen
 	F.Printf("Welcome to %s booking application\n", conferenceName)
 	F.Printf("We have total of %d tickets and %d are still available.\n", conferenceTickets, conferenceRemainingTickets)
@@ -90,30 +102,31 @@ func getUserInfo() (string, string, string, uint) {
 }
 
 // Retrieve firstname from the list
-func getFirstName(bookingsList []string) []string {
+func getFirstName() []string {
 	firstNames := []string{}
 
 	for _, booking := range bookingsList {
-		var names = strings.Fields(booking)
-		firstNames = append(firstNames, names[0])
+
+		// call user first name
+		firstNames = append(firstNames, booking.firstName)
 	}
 	return firstNames
 }
 
-// Validate user info
-func validateUserInput(firstName, lastName, emailAddress string, conferenceRemainingTickets, userTickets uint) (bool, bool, bool) {
-
-	isValidName := len(firstName) >= 2 && len(lastName) >= 2
-	isValidEmail := strings.Contains(emailAddress, "@") && strings.Contains(emailAddress, ".")
-	isValidTickets := userTickets > 0 && userTickets <= conferenceRemainingTickets
-
-	return isValidName, isValidEmail, isValidTickets
-}
-
 // book user tickets
-func bookTicket(bookingsList []string, firstName, lastName, conferenceName, emailAddress string, conferenceRemainingTickets uint, userTickets uint) ([]string, uint) {
-	bookingsList = append(bookingsList, firstName+" "+lastName)
+func bookTicket(firstName, lastName, emailAddress string, userTickets uint) uint {
 	conferenceRemainingTickets -= userTickets
 
-	return bookingsList, conferenceRemainingTickets
+	// Create a type struct for a user
+	var userData = UserData{
+		firstName:       firstName,
+		lastName:        lastName,
+		emailAddress:    emailAddress,
+		numberOfTickets: userTickets,
+	}
+
+	bookingsList = append(bookingsList, userData)
+	F.Println(bookingsList)
+
+	return conferenceRemainingTickets
 }
